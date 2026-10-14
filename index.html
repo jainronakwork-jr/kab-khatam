@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kab Khatam — never miss an expiry date</title>
+<meta name="description" content="Track every expiry date in one place: driving licence, passport, insurance, PUC, medicines, warranties, subscriptions, gas cylinder test. Calendar reminders included. Free and offline.">
+<meta name="theme-color" content="#1D2B4F">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="head wrap">
+  <div class="brand">
+    <svg viewBox="0 0 64 64" aria-hidden="true" class="mark"><rect x="6" y="10" width="52" height="46" rx="8" fill="#1D2B4F"/><rect x="6" y="10" width="52" height="13" rx="6" fill="#B3261E"/><rect x="17" y="4" width="6" height="14" rx="3" fill="#1D2B4F"/><rect x="41" y="4" width="6" height="14" rx="3" fill="#1D2B4F"/><path d="M22 40l7 7 14-15" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <div>
+      <h1>Kab Khatam</h1>
+      <p>Every expiry date in one place — licence to medicines.</p>
+    </div>
+  </div>
+  <button class="btn primary" id="add-btn" type="button">Add an expiry</button>
+</header>
+
+<main class="wrap">
+  <nav class="filters" aria-label="Filter by urgency">
+    <button type="button" data-f="all" aria-pressed="true"><b id="n-all">0</b>All</button>
+    <button type="button" data-f="expired" class="f-exp" aria-pressed="false"><b id="n-expired">0</b>Expired</button>
+    <button type="button" data-f="week" class="f-week" aria-pressed="false"><b id="n-week">0</b>This week</button>
+    <button type="button" data-f="month" class="f-month" aria-pressed="false"><b id="n-month">0</b>In 30 days</button>
+    <button type="button" data-f="later" class="f-later" aria-pressed="false"><b id="n-later">0</b>Later</button>
+  </nav>
+
+  <section id="list" class="list" aria-live="polite"></section>
+
+  <section id="empty" class="empty" hidden>
+    <h2>Nothing tracked yet</h2>
+    <p>Add the dates you always forget — vehicle insurance, PUC, passport, a medicine in the cupboard, the warranty on your new phone.</p>
+    <div class="empty-actions">
+      <button class="btn primary" type="button" data-open-add>Add your first expiry</button>
+      <button class="btn" type="button" id="sample">Show me with sample data</button>
+    </div>
+  </section>
+
+  <section class="tools">
+    <button class="btn" type="button" id="ics-all">Add all to phone calendar</button>
+    <button class="btn" type="button" id="notify">Alert me when I open the app</button>
+    <button class="btn ghost" type="button" id="export">Back up</button>
+    <label class="btn ghost file">Restore backup<input type="file" id="import" accept="application/json"></label>
+  </section>
+  <p class="note">Your dates are saved only on this device. For reminders that ring even when this page is closed, use <em>Add all to phone calendar</em> — your calendar app will alert you before each date.</p>
+</main>
+
+<dialog id="dlg" aria-labelledby="dlg-h">
+  <form method="dialog" id="item-form">
+    <h2 id="dlg-h">Add an expiry</h2>
+    <div class="presets" id="presets" aria-label="Quick picks"></div>
+    <label class="f">What expires?<input name="name" required placeholder="Car insurance — MH12 AB 1234"></label>
+    <div class="row">
+      <label class="f grow">Type
+        <select name="cat">
+          <option>Document</option><option>Vehicle</option><option>Insurance</option><option>Medicine</option>
+          <option>Warranty</option><option>Subscription</option><option>Home</option><option>Gas cylinder</option><option>Other</option>
+        </select>
+      </label>
+      <label class="f grow">Expiry date<input name="expiry" type="date" required></label>
+    </div>
+    <div class="lpg" id="lpg" hidden>
+      <label class="f">Code painted on the cylinder<input name="lpgCode" placeholder="e.g. D-26" maxlength="6"></label>
+      <p id="lpg-out" class="hint">The letter is the quarter (A = Jan–Mar, B = Apr–Jun, C = Jul–Sep, D = Oct–Dec) and the number is the year the safety test is due.</p>
+    </div>
+    <fieldset class="f remind">
+      <legend>Remind me</legend>
+      <label><input type="checkbox" name="r" value="60"><span>2 months before</span></label>
+      <label><input type="checkbox" name="r" value="30" checked><span>1 month</span></label>
+      <label><input type="checkbox" name="r" value="7" checked><span>1 week</span></label>
+      <label><input type="checkbox" name="r" value="1" checked><span>1 day</span></label>
+    </fieldset>
+    <label class="f">Renews
+      <select name="repeat"><option value="">Doesn't repeat</option><option value="monthly">Every month</option><option value="yearly">Every year</option></select>
+    </label>
+    <label class="f">Note<input name="note" placeholder="Policy no., where the paper is kept, who to call"></label>
+    <div class="dlg-actions">
+      <button class="btn ghost" value="cancel" type="button" id="cancel">Cancel</button>
+      <button class="btn primary" value="save" type="submit" id="save">Save</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="renew-dlg" aria-labelledby="renew-h">
+  <form method="dialog" id="renew-form">
+    <h2 id="renew-h">Renewed! What's the new expiry date?</h2>
+    <label class="f">New expiry date<input name="date" type="date" required></label>
+    <div class="dlg-actions">
+      <button class="btn ghost" type="button" id="renew-cancel">Cancel</button>
+      <button class="btn primary" type="submit">Update date</button>
+    </div>
+  </form>
+</dialog>
+
+<footer class="foot wrap">
+  <p>Free and open source. Works offline. <a href="https://github.com/jainronakwork-jr/kab-khatam" rel="noopener" target="_blank">Source on GitHub</a></p>
+</footer>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script src="app.js"></script>
+</body>
+</html>
